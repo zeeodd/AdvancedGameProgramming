@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    //-- Public vars --//
+    // === PUBLIC ===
     public float speed; // Controls player speed
 
-    //-- Private vars --//
+    // === PRIVATE ===
     private Rigidbody2D rb; // 2D rigidbody to grab
     private Vector2 direction;
     private Vector3 mousePosition;

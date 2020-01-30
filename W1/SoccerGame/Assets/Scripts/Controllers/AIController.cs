@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class AIController : MonoBehaviour
 {
-    //-- Public vars --//
+    // === PUBLIC ===
     public float speed; // Controls player speed
     public GameObject ball; // Ball to follow
 
-    //-- Private vars --//
+    // === PRIVATE ===
     private Rigidbody2D rb; // 2D rigidbody to grab
     private Vector2 direction;
 
@@ -20,6 +20,12 @@ public class AIController : MonoBehaviour
     }
 
     void Update()
+    {
+        direction = (ball.transform.position - transform.position).normalized;
+        rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
+    }
+
+    public void MoveTowardsBall()
     {
         direction = (ball.transform.position - transform.position).normalized;
         rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
