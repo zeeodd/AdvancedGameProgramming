@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
 
     public void Update()
     {
-        ServicesLocator.AIManager.MoveTowardsBall();
         ServicesLocator.InputManager.MovePlayer();
+        ServicesLocator.AIManager.MoveTowardsBall();
     }
 }

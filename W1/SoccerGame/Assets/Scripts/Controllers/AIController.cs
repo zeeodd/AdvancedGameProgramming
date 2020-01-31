@@ -24,4 +24,9 @@ public class AIController : MonoBehaviour
         direction = (ball.transform.position - transform.position).normalized;
         rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
     }
+
+    public void DestroyEnemy()
+    {
+        Destroy(gameObject);
+    }
 }
