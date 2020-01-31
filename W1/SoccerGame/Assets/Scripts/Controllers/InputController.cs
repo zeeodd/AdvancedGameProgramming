@@ -10,14 +10,14 @@ public class InputController : MonoBehaviour
     // === PRIVATE ===
     private Rigidbody2D rb; // 2D rigidbody to grab
     private Vector2 direction;
-    private Vector3 mousePosition;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        
     }
 
-    void Update()
+    public void MovePlayer()
     {
         if (Input.GetMouseButton(0))
         {
@@ -25,7 +25,7 @@ public class InputController : MonoBehaviour
         }
         else
         {
-            mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
             direction = (mousePosition - transform.position).normalized;
             rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
