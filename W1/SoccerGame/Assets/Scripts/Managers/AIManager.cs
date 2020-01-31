@@ -11,8 +11,11 @@ public class AIManager
         enemies = GameObject.FindGameObjectsWithTag("Enemy");
     }
 
-    public void Update()
+    public void MoveTowardBall()
     {
-        Debug.Log(GameObject.FindGameObjectsWithTag("Enemy"));
+        foreach (GameObject enemy in ServicesLocator.AIManager.enemies)
+        {
+            enemy.GetComponent<AIController>().MoveTowardsBall();
+        }
     }
 }

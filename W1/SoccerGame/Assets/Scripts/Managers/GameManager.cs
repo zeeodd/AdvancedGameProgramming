@@ -10,8 +10,13 @@ public class GameManager : MonoBehaviour
         ServicesLocator.AIManager = new AIManager();
     }
 
+    public void Start()
+    {
+        ServicesLocator.AIManager.Initialize();
+    }
+
     public void Update()
     {
-        print(ServicesLocator.AIManager.enemies);
+        ServicesLocator.AIManager.MoveTowardBall();
     }
 }

@@ -19,12 +19,6 @@ public class AIController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
     }
 
-    void Update()
-    {
-        direction = (ball.transform.position - transform.position).normalized;
-        rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
-    }
-
     public void MoveTowardsBall()
     {
         direction = (ball.transform.position - transform.position).normalized;
