@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI score;
     #endregion
 
+    #region Game Cycle
     public void Awake()
     {
         ServicesLocator.GameManager = this;
@@ -46,7 +47,9 @@ public class GameManager : MonoBehaviour
         ServicesLocator.AIManager.MoveTowardsBall(ball, aiMovementSpeed);
         ServicesLocator.ScoreManager.UpdateScore(score);
     }
+    #endregion
 
+    #region Functions
     private void CreatePlayers()
     {
         for (int i = 0; i < blueTeamNumber; i++)
@@ -69,4 +72,5 @@ public class GameManager : MonoBehaviour
             ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(8, i).SetTag("AI").SetAI(true));
         }
     }
+    #endregion
 }

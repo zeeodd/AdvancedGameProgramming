@@ -16,11 +16,9 @@ public class ScoreManager
         redScore = 0;
         blueScore = 0;
         score.text = "blue:\t"+blueScore+"\nred:\t"+redScore;
-    }
-    public void Start()
-    {
         ServicesLocator.EventManager.Register<GoalScored>(IncrementScore);
     }
+
     public void OnDestroy()
     {
         ServicesLocator.EventManager.Unregister<GoalScored>(IncrementScore);
@@ -35,7 +33,6 @@ public class ScoreManager
 
     public void IncrementScore(AGPEvent e)
     {
-        redScore += 1;
         Error.PrintError("Score Has Increased!");
     }
     #endregion
