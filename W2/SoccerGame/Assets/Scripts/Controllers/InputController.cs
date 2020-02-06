@@ -5,7 +5,7 @@ using UnityEngine;
 public class InputController : MonoBehaviour
 {
     // === PUBLIC ===
-    public float speed; // Controls player speed
+    public float speed = 25; // Controls player speed
 
     // === PRIVATE ===
     private Rigidbody2D rb; // 2D rigidbody to grab
@@ -14,7 +14,6 @@ public class InputController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        
     }
 
     public void MovePlayer()

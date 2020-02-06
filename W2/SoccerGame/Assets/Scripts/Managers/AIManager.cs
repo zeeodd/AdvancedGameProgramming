@@ -4,34 +4,34 @@ using UnityEngine;
 
 public class AIManager
 {
-    public List<GameObject> enemies = new List<GameObject>();
+    public List<GameObject> listOfAI = new List<GameObject>();
 
     public void Initialize()
     {
-        foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("Enemy"))
+        foreach (GameObject ai in GameObject.FindGameObjectsWithTag("AI"))
         {
-            enemies.Add(enemy);
+            listOfAI.Add(ai);
         }
     }
 
-    public void MoveTowardsBall()
+    public void MoveTowardsBall(GameObject ball, float speed)
     {
-        if (enemies.Count == 0) Error.PrintError("There are no enemies left!");
+        if (listOfAI.Count == 0) Error.PrintError("There are no enemies left!");
         else
         {
-            foreach (GameObject enemy in ServicesLocator.AIManager.enemies)
+            foreach (GameObject ai in ServicesLocator.AIManager.listOfAI)
             {
-                enemy.GetComponent<AIController>().MoveTowardsBall();
+                ai.GetComponent<AIController>().MoveTowardsBall(ball, speed);
             }
         }
     }
 
     public void DestroyEnemy()
     {
-        foreach (GameObject enemy in ServicesLocator.AIManager.enemies)
+        foreach (GameObject ai in ServicesLocator.AIManager.listOfAI)
         {
-            enemy.GetComponent<AIController>().DestroyEnemy();
-            enemies.Remove(enemy);
+            ai.GetComponent<AIController>().DestroyEnemy();
+            listOfAI.Remove(ai);
         }
     }
 }
