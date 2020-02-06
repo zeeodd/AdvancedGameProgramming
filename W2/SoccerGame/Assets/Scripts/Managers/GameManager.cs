@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -15,6 +16,8 @@ public class GameManager : MonoBehaviour
 
     [Range(1f, 4f)]
     public int aiMovementSpeed;
+
+    public TextMeshProUGUI score;
     #endregion
 
     public void Awake()
@@ -22,8 +25,10 @@ public class GameManager : MonoBehaviour
         ServicesLocator.GameManager = this;
         ServicesLocator.AIManager = new AIManager();
         ServicesLocator.InputManager = new InputManager();
+        ServicesLocator.ScoreManager = new ScoreManager();
         ServicesLocator.UserPlayer = new List<SoccerPlayer>();
         ServicesLocator.AIPlayers = new List<SoccerPlayer>();
+        ServicesLocator.EventManager = new EventManager();
 
         CreatePlayers();
     }
@@ -32,12 +37,14 @@ public class GameManager : MonoBehaviour
     {
         ServicesLocator.AIManager.Initialize();
         ServicesLocator.InputManager.Initialize();
+        ServicesLocator.ScoreManager.Initialize(score);
     }
 
     public void Update()
     {
         ServicesLocator.InputManager.MovePlayer();
         ServicesLocator.AIManager.MoveTowardsBall(ball, aiMovementSpeed);
+        ServicesLocator.ScoreManager.UpdateScore(score);
     }
 
     private void CreatePlayers()
