@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class EventManager
 {
-
-	private Dictionary<Type, AGPEvent.Handler> _registeredHandlers = new Dictionary<Type, AGPEvent.Handler>();
+    #region Constructor Code
+    private Dictionary<Type, AGPEvent.Handler> _registeredHandlers = new Dictionary<Type, AGPEvent.Handler>();
 
 	public void Register<T>(AGPEvent.Handler handler) where T : AGPEvent
 	{
@@ -67,13 +67,16 @@ public abstract class AGPEvent
 
 	public delegate void Handler(AGPEvent e);
 }
+#endregion
 
-public class GoalScored : AGPEvent
+#region Events
+public class GoalScoredOnBlueTeam : AGPEvent
 {
-	public readonly bool blueGoal;
-
-	public GoalScored(bool blueGoal)
-	{
-		this.blueGoal = blueGoal;
-	}
+	public GoalScoredOnBlueTeam() {}
 }
+
+public class GoalScoredOnRedTeam : AGPEvent
+{
+	public GoalScoredOnRedTeam() { }
+}
+#endregion

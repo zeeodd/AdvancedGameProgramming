@@ -16,12 +16,14 @@ public class ScoreManager
         redScore = 0;
         blueScore = 0;
         score.text = "blue:\t"+blueScore+"\nred:\t"+redScore;
-        ServicesLocator.EventManager.Register<GoalScored>(IncrementScore);
+        ServicesLocator.EventManager.Register<GoalScoredOnBlueTeam>(OnGoalScoredOnBlueTeam);
+        ServicesLocator.EventManager.Register<GoalScoredOnRedTeam>(OnGoalScoredOnRedTeam);
     }
 
     public void OnDestroy()
     {
-        ServicesLocator.EventManager.Unregister<GoalScored>(IncrementScore);
+        ServicesLocator.EventManager.Unregister<GoalScoredOnBlueTeam>(OnGoalScoredOnBlueTeam);
+        ServicesLocator.EventManager.Register<GoalScoredOnRedTeam>(OnGoalScoredOnRedTeam);
     }
     #endregion
 
@@ -31,9 +33,14 @@ public class ScoreManager
         score.text = "blue:\t" + blueScore + "\nred:\t" + redScore;
     }
 
-    public void IncrementScore(AGPEvent e)
+    public void OnGoalScoredOnBlueTeam(AGPEvent e)
     {
-        Error.PrintError("Score Has Increased!");
+        redScore++;
+    }
+
+    public void OnGoalScoredOnRedTeam(AGPEvent e)
+    {
+        blueScore++;
     }
     #endregion
 }
