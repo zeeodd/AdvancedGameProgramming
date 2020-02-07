@@ -18,6 +18,16 @@ public class GameManager : MonoBehaviour
     public int aiMovementSpeed;
 
     public TextMeshProUGUI score;
+
+    public GameObject titleScreen;
+
+    public GameObject gameScreen;
+
+    public GameObject endScreen;
+
+    private bool atTitleScreen = true;
+    private bool gameScreenObjectsReady = false;
+    private bool gameOver = false;
     #endregion
 
     #region Game Cycle
@@ -31,21 +41,34 @@ public class GameManager : MonoBehaviour
         ServicesLocator.AIPlayers = new List<SoccerPlayer>();
         ServicesLocator.EventManager = new EventManager();
 
-        CreatePlayers();
+        InitializeTitleScreen();
     }
 
     public void Start()
     {
-        ServicesLocator.AIManager.Initialize();
-        ServicesLocator.InputManager.Initialize();
         ServicesLocator.ScoreManager.Initialize(score);
     }
 
     public void Update()
     {
-        ServicesLocator.InputManager.MovePlayer();
-        ServicesLocator.AIManager.MoveTowardsBall(ball, aiMovementSpeed);
-        ServicesLocator.ScoreManager.UpdateScore(score);
+        if (Input.GetKeyDown(KeyCode.Space) && atTitleScreen)
+        {
+            CreatePlayers();
+            atTitleScreen = false;
+        }
+        
+        if (!atTitleScreen && !gameScreenObjectsReady)
+        {
+            ServicesLocator.EventManager.Fire(new ExitTitleScreen());
+        }
+
+        if (gameScreenObjectsReady && !gameOver)
+        {
+            ServicesLocator.AIManager.MoveTowardsBall(ball, aiMovementSpeed);
+            ServicesLocator.InputManager.MovePlayer();
+            ServicesLocator.ScoreManager.UpdateScore(score);
+            ServicesLocator.ScoreManager.CheckGameOver();
+        }
     }
     #endregion
 
@@ -71,6 +94,47 @@ public class GameManager : MonoBehaviour
             var gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Enemy"));
             ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(8, i).SetTag("AI").SetAI(true));
         }
+
     }
+
+    private void InitializeTitleScreen()
+    {
+        ServicesLocator.EventManager.Register<ExitTitleScreen>(InitializeGameScreen);
+        ServicesLocator.EventManager.Register<GameOver>(HandleGameOver);
+        titleScreen.SetActive(true);
+        gameScreen.SetActive(false);
+        endScreen.SetActive(false);
+    }
+
+    private void InitializeGameScreen(AGPEvent e)
+    {
+        ServicesLocator.EventManager.Unregister<ExitTitleScreen>(InitializeGameScreen);
+
+        titleScreen.SetActive(false);
+        gameScreen.SetActive(true);
+
+        ServicesLocator.InputManager.Initialize();
+        ServicesLocator.AIManager.Initialize();
+
+        gameScreenObjectsReady = true;
+    }
+
+    private void HandleGameOver(AGPEvent e)
+    {
+        gameScreen.SetActive(false);
+        endScreen.SetActive(true);
+
+        foreach (AIPlayer aiplayer in ServicesLocator.AIPlayers)
+        {
+            aiplayer.Destroy();
+        }
+
+        foreach (UserPlayer userplayer in ServicesLocator.UserPlayer)
+        {
+            userplayer.Destroy();
+        }
+
+        gameOver = true;
+    } 
     #endregion
 }

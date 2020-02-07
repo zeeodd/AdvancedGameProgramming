@@ -8,6 +8,7 @@ public class ScoreManager
     #region Variables
     public int redScore;
     public int blueScore;
+    public const int maxScore = 3;
     #endregion
 
     #region Lifecycle Management
@@ -15,7 +16,7 @@ public class ScoreManager
     {
         redScore = 0;
         blueScore = 0;
-        score.text = "blue:\t"+blueScore+"\nred:\t"+redScore;
+        score.text = "\tblue: " + blueScore + "\t\t\t\t\t\t\t\t\tred: " + redScore;
         ServicesLocator.EventManager.Register<GoalScoredOnBlueTeam>(OnGoalScoredOnBlueTeam);
         ServicesLocator.EventManager.Register<GoalScoredOnRedTeam>(OnGoalScoredOnRedTeam);
     }
@@ -23,14 +24,14 @@ public class ScoreManager
     public void OnDestroy()
     {
         ServicesLocator.EventManager.Unregister<GoalScoredOnBlueTeam>(OnGoalScoredOnBlueTeam);
-        ServicesLocator.EventManager.Register<GoalScoredOnRedTeam>(OnGoalScoredOnRedTeam);
+        ServicesLocator.EventManager.Unregister<GoalScoredOnRedTeam>(OnGoalScoredOnRedTeam);
     }
     #endregion
 
     #region Functionality
     public void UpdateScore(TextMeshProUGUI score)
     {
-        score.text = "blue:\t" + blueScore + "\nred:\t" + redScore;
+        score.text = "\tblue: " + blueScore + "\t\t\t\t\t\t\t\t\tred: " + redScore;
     }
 
     public void OnGoalScoredOnBlueTeam(AGPEvent e)
@@ -41,6 +42,14 @@ public class ScoreManager
     public void OnGoalScoredOnRedTeam(AGPEvent e)
     {
         blueScore++;
+    }
+
+    public void CheckGameOver()
+    {
+        if (blueScore == 3 || redScore == 3)
+        {
+            ServicesLocator.EventManager.Fire(new GameOver());
+        }
     }
     #endregion
 }

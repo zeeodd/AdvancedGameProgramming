@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+#region Constructor Code
 public class EventManager
 {
-    #region Constructor Code
+
     private Dictionary<Type, AGPEvent.Handler> _registeredHandlers = new Dictionary<Type, AGPEvent.Handler>();
 
 	public void Register<T>(AGPEvent.Handler handler) where T : AGPEvent
@@ -78,5 +79,15 @@ public class GoalScoredOnBlueTeam : AGPEvent
 public class GoalScoredOnRedTeam : AGPEvent
 {
 	public GoalScoredOnRedTeam() { }
+}
+
+public class ExitTitleScreen : AGPEvent
+{
+	public ExitTitleScreen() { }
+}
+
+public class GameOver : AGPEvent
+{
+	public GameOver() { }
 }
 #endregion
