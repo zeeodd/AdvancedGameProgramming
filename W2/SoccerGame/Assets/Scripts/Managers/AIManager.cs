@@ -34,4 +34,5 @@ public class AIManager
             listOfAI.Remove(ai);
         }
     }
+
 }

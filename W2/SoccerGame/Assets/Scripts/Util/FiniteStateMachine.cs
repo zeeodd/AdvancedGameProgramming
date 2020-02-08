@@ -120,4 +120,20 @@ public class FiniteStateMachine<TContext>
 		public virtual void CleanUp() { }
 	}
 
+	private abstract class GameStart : FiniteStateMachine<GameManager>.State
+	{
+		public override void OnEnter()
+		{
+			// initialization
+		}
+		public override void Update()
+		{
+			// update
+		}
+		public override void OnExit()
+		{
+			// on exit
+		}
+	}
+
 }

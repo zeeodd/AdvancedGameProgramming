@@ -25,9 +25,12 @@ public class GameManager : MonoBehaviour
 
     public GameObject endScreen;
 
+    private FiniteStateMachine<GameManager> _GameManagerStateMachine;
+
     private bool atTitleScreen = true;
     private bool gameScreenObjectsReady = false;
     private bool gameOver = false;
+    private bool hasWaitedOneFrame = false;
     #endregion
 
     #region Game Cycle
@@ -40,6 +43,9 @@ public class GameManager : MonoBehaviour
         ServicesLocator.UserPlayer = new List<SoccerPlayer>();
         ServicesLocator.AIPlayers = new List<SoccerPlayer>();
         ServicesLocator.EventManager = new EventManager();
+
+        _GameManagerStateMachine = new FiniteStateMachine<GameManager>(this);
+        // _GameManagerStateMachine.TransitionTo<GameStart>();
 
         InitializeTitleScreen();
     }
@@ -54,6 +60,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && atTitleScreen)
         {
             CreatePlayers();
+            ServicesLocator.InputManager.Initialize();
             atTitleScreen = false;
         }
         
@@ -64,8 +71,15 @@ public class GameManager : MonoBehaviour
 
         if (gameScreenObjectsReady && !gameOver)
         {
-            ServicesLocator.AIManager.MoveTowardsBall(ball, aiMovementSpeed);
-            ServicesLocator.InputManager.MovePlayer();
+            if (!hasWaitedOneFrame)
+            {
+                StartCoroutine(GreenFlagMovement());
+            } 
+            else
+            {
+                ServicesLocator.AIManager.MoveTowardsBall(ball, aiMovementSpeed);
+                ServicesLocator.InputManager.MovePlayer();
+            }
             ServicesLocator.ScoreManager.UpdateScore(score);
             ServicesLocator.ScoreManager.CheckGameOver();
         }
@@ -110,11 +124,10 @@ public class GameManager : MonoBehaviour
     {
         ServicesLocator.EventManager.Unregister<ExitTitleScreen>(InitializeGameScreen);
 
+        ServicesLocator.AIManager.Initialize();
+
         titleScreen.SetActive(false);
         gameScreen.SetActive(true);
-
-        ServicesLocator.InputManager.Initialize();
-        ServicesLocator.AIManager.Initialize();
 
         gameScreenObjectsReady = true;
     }
@@ -134,7 +147,16 @@ public class GameManager : MonoBehaviour
             userplayer.Destroy();
         }
 
+        ServicesLocator.EventManager.Unregister<GameOver>(HandleGameOver);
+
         gameOver = true;
-    } 
+    }
+
+    IEnumerator GreenFlagMovement()
+    {
+        yield return 0;
+
+        hasWaitedOneFrame = true;
+    }
     #endregion
 }
