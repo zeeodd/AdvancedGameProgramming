@@ -25,6 +25,12 @@ public class GameManager : MonoBehaviour
 
     public GameObject endScreen;
 
+    // Example state check
+    public bool IsInGame()
+    {
+        return _GameManagerStateMachine.CurrentState.GetType() == typeof(GameStart);
+    }
+
     private FiniteStateMachine<GameManager> _GameManagerStateMachine;
 
     private bool atTitleScreen = true;
@@ -32,6 +38,43 @@ public class GameManager : MonoBehaviour
     private bool gameOver = false;
     private bool hasWaitedOneFrame = false;
     #endregion
+
+    private class GameState : FiniteStateMachine<GameManager>.State
+    {
+        public override void OnEnter()
+        {
+            // initialization
+            // Probably want to put the start code here
+        }
+        public override void Update()
+        {
+            // update
+        }
+        public override void OnExit()
+        {
+            // on exit
+        }
+    }
+
+    private class TitleScreen : GameState
+    {
+        public override void OnEnter()
+        {
+            //base.OnEnter();
+
+            Context.InitializeTitleScreen();
+        }
+
+        public override void Update()
+        {
+            base.Update();
+        }
+
+        public override void OnExit()
+        {
+            base.OnExit();
+        }
+    }
 
     #region Game Cycle
     public void Awake()
@@ -45,7 +88,8 @@ public class GameManager : MonoBehaviour
         ServicesLocator.EventManager = new EventManager();
 
         _GameManagerStateMachine = new FiniteStateMachine<GameManager>(this);
-        // _GameManagerStateMachine.TransitionTo<GameStart>();
+        _GameManagerStateMachine.TransitionTo<TitleScreen>();
+        // Use Context to use functions from THIS GameManager (via Context)
 
         InitializeTitleScreen();
     }

@@ -90,4 +90,21 @@ public class GameOver : AGPEvent
 {
 	public GameOver() { }
 }
+
+public class GameStart : AGPEvent
+{
+    public GameStart() { }
+}
+
+
+public class GameTimeOut : AGPEvent
+{
+    public readonly int blueScore, redScore;
+
+    public GameTimeOut(int blueScore, int redScore)
+    {
+        this.blueScore = blueScore;
+        this.redScore = redScore;
+    }
+}
 #endregion
