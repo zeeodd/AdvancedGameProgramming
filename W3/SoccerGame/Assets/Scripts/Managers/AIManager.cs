@@ -16,7 +16,7 @@ public class AIManager
 
     public void MoveTowardsBall(GameObject ball, float speed)
     {
-        if (listOfAI.Count == 0) Error.PrintError("There are no enemies left!");
+        if (listOfAI.Count == 0) ZLog.Print("There are no enemies left!");
         else
         {
             foreach (GameObject ai in ServicesLocator.AIManager.listOfAI)
@@ -26,13 +26,14 @@ public class AIManager
         }
     }
 
-    public void DestroyEnemy()
+    public void Destroy()
     {
-        foreach (GameObject ai in ServicesLocator.AIManager.listOfAI)
+        foreach (GameObject aiplayer in listOfAI)
         {
-            ai.GetComponent<AIController>().DestroyEnemy();
-            listOfAI.Remove(ai);
+            aiplayer.GetComponent<AIController>().Destroy();
         }
+
+        listOfAI.Clear();
     }
 
 }

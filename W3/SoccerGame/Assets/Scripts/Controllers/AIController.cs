@@ -19,7 +19,7 @@ public class AIController : MonoBehaviour
         rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
     }
 
-    public void DestroyEnemy()
+    public void Destroy()
     {
         Destroy(gameObject);
     }

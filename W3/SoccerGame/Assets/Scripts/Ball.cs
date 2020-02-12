@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
+    private Vector3 initialPosition;
+
+    public void Awake()
+    {
+        initialPosition = gameObject.transform.position;
+    }
+
     public void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "Goal" && collision.name == "PlayerGoal")
@@ -19,4 +26,8 @@ public class Ball : MonoBehaviour
         }
     }
 
+    public void ResetPosition()
+    {
+        transform.position = initialPosition;
+    }
 }

@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     public int aiMovementSpeed;
 
     public TextMeshProUGUI score;
+    public TextMeshProUGUI timer;
 
     public GameObject titleScreen;
 
@@ -32,52 +33,28 @@ public class GameManager : MonoBehaviour
     }
 
     private FiniteStateMachine<GameManager> _GameManagerStateMachine;
-
-    private bool atTitleScreen = true;
-    private bool gameScreenObjectsReady = false;
-    private bool gameOver = false;
-    private bool hasWaitedOneFrame = false;
     #endregion
-
-    private class GameState : FiniteStateMachine<GameManager>.State
-    {
-        public override void OnEnter()
-        {
-            // initialization
-            // Probably want to put the start code here
-        }
-        public override void Update()
-        {
-            // update
-        }
-        public override void OnExit()
-        {
-            // on exit
-        }
-    }
-
-    private class TitleScreen : GameState
-    {
-        public override void OnEnter()
-        {
-            //base.OnEnter();
-
-            Context.InitializeTitleScreen();
-        }
-
-        public override void Update()
-        {
-            base.Update();
-        }
-
-        public override void OnExit()
-        {
-            base.OnExit();
-        }
-    }
 
     #region Game Cycle
     public void Awake()
+    {
+        InitializeServices();
+    }
+
+    public void Update()
+    {
+        _GameManagerStateMachine.Update();
+    }
+
+    private void OnDestroy()
+    {
+        ServicesLocator.EventManager.Unregister<GameOver>(HandleGameOver);
+        ServicesLocator.EventManager.Unregister<GameTimeOut>(HandleGameOver);
+    }
+    #endregion
+
+    #region Functions
+    private void InitializeServices()
     {
         ServicesLocator.GameManager = this;
         ServicesLocator.AIManager = new AIManager();
@@ -87,50 +64,12 @@ public class GameManager : MonoBehaviour
         ServicesLocator.AIPlayers = new List<SoccerPlayer>();
         ServicesLocator.EventManager = new EventManager();
 
+        ServicesLocator.ScoreManager.Initialize(score, timer);
+
         _GameManagerStateMachine = new FiniteStateMachine<GameManager>(this);
-        _GameManagerStateMachine.TransitionTo<TitleScreen>();
-        // Use Context to use functions from THIS GameManager (via Context)
-
-        InitializeTitleScreen();
+        _GameManagerStateMachine.TransitionTo<TitleScreenState>();
     }
 
-    public void Start()
-    {
-        ServicesLocator.ScoreManager.Initialize(score);
-    }
-
-    public void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) && atTitleScreen)
-        {
-            CreatePlayers();
-            ServicesLocator.InputManager.Initialize();
-            atTitleScreen = false;
-        }
-        
-        if (!atTitleScreen && !gameScreenObjectsReady)
-        {
-            ServicesLocator.EventManager.Fire(new ExitTitleScreen());
-        }
-
-        if (gameScreenObjectsReady && !gameOver)
-        {
-            if (!hasWaitedOneFrame)
-            {
-                StartCoroutine(GreenFlagMovement());
-            } 
-            else
-            {
-                ServicesLocator.AIManager.MoveTowardsBall(ball, aiMovementSpeed);
-                ServicesLocator.InputManager.MovePlayer();
-            }
-            ServicesLocator.ScoreManager.UpdateScore(score);
-            ServicesLocator.ScoreManager.CheckGameOver();
-        }
-    }
-    #endregion
-
-    #region Functions
     private void CreatePlayers()
     {
         for (int i = 0; i < blueTeamNumber; i++)
@@ -157,50 +96,114 @@ public class GameManager : MonoBehaviour
 
     private void InitializeTitleScreen()
     {
-        ServicesLocator.EventManager.Register<ExitTitleScreen>(InitializeGameScreen);
-        ServicesLocator.EventManager.Register<GameOver>(HandleGameOver);
         titleScreen.SetActive(true);
         gameScreen.SetActive(false);
         endScreen.SetActive(false);
     }
 
-    private void InitializeGameScreen(AGPEvent e)
+    private void InitializeGameScreen()
     {
-        ServicesLocator.EventManager.Unregister<ExitTitleScreen>(InitializeGameScreen);
+        CreatePlayers();
 
+        ServicesLocator.InputManager.Initialize();
         ServicesLocator.AIManager.Initialize();
 
         titleScreen.SetActive(false);
         gameScreen.SetActive(true);
-
-        gameScreenObjectsReady = true;
+        endScreen.SetActive(false);
     }
+    #endregion
 
+    #region Event Handler Functions
     private void HandleGameOver(AGPEvent e)
     {
-        gameScreen.SetActive(false);
-        endScreen.SetActive(true);
+        _GameManagerStateMachine.TransitionTo<GameOverState>();
+    }
+    #endregion
 
-        foreach (AIPlayer aiplayer in ServicesLocator.AIPlayers)
+    #region States
+    // Parent State
+    private class GameState : FiniteStateMachine<GameManager>.State
+    {
+        public override void OnEnter() 
         {
-            aiplayer.Destroy();
+            ServicesLocator.EventManager.Register<GameOver>(Context.HandleGameOver);
+            ServicesLocator.EventManager.Register<GameTimeOut>(Context.HandleGameOver);
         }
-
-        foreach (UserPlayer userplayer in ServicesLocator.UserPlayer)
-        {
-            userplayer.Destroy();
-        }
-
-        ServicesLocator.EventManager.Unregister<GameOver>(HandleGameOver);
-
-        gameOver = true;
+        public override void Update() { }
+        public override void OnExit() { }
     }
 
-    IEnumerator GreenFlagMovement()
+    private class TitleScreenState : GameState
     {
-        yield return 0;
+        public override void OnEnter()
+        {
+            Context.InitializeTitleScreen();
+        }
 
-        hasWaitedOneFrame = true;
+        public override void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                TransitionTo<InGameState>();
+            }
+        }
+
+        public override void OnExit()
+        {
+            base.OnExit();
+        }
+    }
+
+    private class InGameState : GameState
+    {
+        public override void OnEnter()
+        {
+            base.OnEnter();
+            Context.InitializeGameScreen();
+            Context.ball.GetComponent<Ball>().ResetPosition();
+            ServicesLocator.ScoreManager.Initialize(Context.score, Context.timer);
+        }
+
+        public override void Update()
+        {
+            ServicesLocator.AIManager.MoveTowardsBall(Context.ball, Context.aiMovementSpeed);
+            ServicesLocator.InputManager.MovePlayer();
+            ServicesLocator.ScoreManager.UpdateScore(Context.score);
+            ServicesLocator.ScoreManager.UpdateTimer(Context.timer);
+        }
+
+        public override void OnExit()
+        {
+            base.OnExit();
+        }
+    }
+
+    private class GameOverState : GameState
+    {
+        public override void OnEnter()
+        {
+            Context.gameScreen.SetActive(false);
+            Context.endScreen.SetActive(true);
+
+            ServicesLocator.AIManager.Destroy();
+            ServicesLocator.InputManager.Destroy();
+        }
+
+        public override void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                TransitionTo<InGameState>();
+            }
+        }
+
+        public override void OnExit()
+        {
+            ServicesLocator.UserPlayer.Clear();
+            ServicesLocator.AIPlayers.Clear();
+            ServicesLocator.ScoreManager.Destroy();
+        }
     }
     #endregion
 }

@@ -11,44 +11,63 @@ public class ScoreManager
     public const int maxScore = 3;
 
     public float timer = 0;
-    public const float maxTime = 10f;
+    public const float startTime = 25f;
     #endregion
 
     #region Lifecycle Management
-    public void  Initialize(TextMeshProUGUI score)
+    public void Initialize(TextMeshProUGUI scoreobj, TextMeshProUGUI timerobj)
     {
         redScore = 0;
         blueScore = 0;
-        score.text = "\tblue: " + blueScore + "\t\t\t\t\t\t\t\t\tred: " + redScore;
-        ServicesLocator.EventManager.Register<GameStart>(OnGameStart);
+        timer = startTime;
+        scoreobj.text = "\tblue: " + blueScore + "\t\t\t\t\t\t\t\t\tred: " + redScore;
+        timerobj.text = startTime.ToString();
         ServicesLocator.EventManager.Register<GoalScoredOnBlueTeam>(OnGoalScoredOnBlueTeam);
         ServicesLocator.EventManager.Register<GoalScoredOnRedTeam>(OnGoalScoredOnRedTeam);
     }
 
-    private void Update()
-    {
-        timer += Time.deltaTime;
-
-        if (timer >= maxTime)
-        {
-            ServicesLocator.EventManager.Fire(new GameTimeOut(blueScore, redScore));
-            // TO GET SCORE: var redScore = ((GameTimedOut) e).redScore;
-        }
-    }
-
-    public void OnDestroy()
+    public void Destroy()
     {
         ServicesLocator.EventManager.Unregister<GoalScoredOnBlueTeam>(OnGoalScoredOnBlueTeam);
         ServicesLocator.EventManager.Unregister<GoalScoredOnRedTeam>(OnGoalScoredOnRedTeam);
     }
     #endregion
 
-    #region Functionality
-    public void UpdateScore(TextMeshProUGUI score)
+    #region Functions
+    public void UpdateScore(TextMeshProUGUI scoreobj)
     {
-        score.text = "\tblue: " + blueScore + "\t\t\t\t\t\t\t\t\tred: " + redScore;
+        scoreobj.text = "\tblue: " + blueScore + "\t\t\t\t\t\t\t\t\tred: " + redScore;
+
+        if (blueScore == 3 || redScore == 3)
+        {
+            ServicesLocator.EventManager.Fire(new GameOver());
+        }
     }
 
+    public void UpdateTimer(TextMeshProUGUI timerobj)
+    {
+        timer -= Time.deltaTime;
+
+        timerobj.text = StyleTimer(timer);
+
+        if (timer <= 0f)
+        {
+            ServicesLocator.EventManager.Fire(new GameTimeOut(blueScore, redScore));
+            // TO GET SCORE: var redScore = ((GameTimedOut) e).redScore;
+        }
+    }
+
+    private string StyleTimer(float timer)
+    {
+        int minutes = Mathf.FloorToInt(timer / 60F);
+        int seconds = Mathf.FloorToInt(timer - minutes * 60);
+        string niceTime = string.Format("{0:00}:{1:00}", minutes, seconds);
+
+        return niceTime;
+    }
+    #endregion
+
+    #region Event Handler Functions
     public void OnGoalScoredOnBlueTeam(AGPEvent e)
     {
         redScore++;
@@ -57,19 +76,6 @@ public class ScoreManager
     public void OnGoalScoredOnRedTeam(AGPEvent e)
     {
         blueScore++;
-    }
-
-    public void CheckGameOver()
-    {
-        if (blueScore == 3 || redScore == 3)
-        {
-            ServicesLocator.EventManager.Fire(new GameOver());
-        }
-    }
-
-    public void OnGameStart(AGPEvent e)
-    {
-        timer = 0;
     }
     #endregion
 }

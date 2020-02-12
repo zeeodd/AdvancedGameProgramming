@@ -15,4 +15,9 @@ public class InputManager
     {
         player.GetComponent<InputController>().MovePlayer();
     }
+
+    public void Destroy()
+    {
+        player.GetComponent<InputController>().Destroy();
+    }
 }

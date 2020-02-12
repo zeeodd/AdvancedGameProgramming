@@ -71,31 +71,13 @@ public abstract class AGPEvent
 #endregion
 
 #region Events
-public class GoalScoredOnBlueTeam : AGPEvent
-{
-	public GoalScoredOnBlueTeam() {}
-}
+public class GoalScoredOnBlueTeam : AGPEvent { }
 
-public class GoalScoredOnRedTeam : AGPEvent
-{
-	public GoalScoredOnRedTeam() { }
-}
+public class GoalScoredOnRedTeam : AGPEvent { }
 
-public class ExitTitleScreen : AGPEvent
-{
-	public ExitTitleScreen() { }
-}
+public class GameOver : AGPEvent { }
 
-public class GameOver : AGPEvent
-{
-	public GameOver() { }
-}
-
-public class GameStart : AGPEvent
-{
-    public GameStart() { }
-}
-
+public class GameStart : AGPEvent { }
 
 public class GameTimeOut : AGPEvent
 {

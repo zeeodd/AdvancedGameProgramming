@@ -30,4 +30,9 @@ public class InputController : MonoBehaviour
             rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
         }
     }
+
+    public void Destroy()
+    {
+        Destroy(gameObject);
+    }
 }
