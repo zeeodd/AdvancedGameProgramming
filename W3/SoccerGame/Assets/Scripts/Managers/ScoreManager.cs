@@ -15,21 +15,20 @@ public class ScoreManager
     #endregion
 
     #region Lifecycle Management
-    public void Initialize(TextMeshProUGUI scoreobj, TextMeshProUGUI timerobj)
+    public void Initialize(TextMeshProUGUI scoreobj, TextMeshProUGUI timerobj, TextMeshProUGUI readytextobj)
     {
         redScore = 0;
         blueScore = 0;
         timer = startTime;
         scoreobj.text = "\tblue: " + blueScore + "\t\t\t\t\t\t\t\t\tred: " + redScore;
         timerobj.text = startTime.ToString();
-        ServicesLocator.EventManager.Register<GoalScoredOnBlueTeam>(OnGoalScoredOnBlueTeam);
-        ServicesLocator.EventManager.Register<GoalScoredOnRedTeam>(OnGoalScoredOnRedTeam);
+        readytextobj.gameObject.SetActive(false);
+        ServicesLocator.EventManager.Register<GoalScored>(OnGoalScored);
     }
 
     public void Destroy()
     {
-        ServicesLocator.EventManager.Unregister<GoalScoredOnBlueTeam>(OnGoalScoredOnBlueTeam);
-        ServicesLocator.EventManager.Unregister<GoalScoredOnRedTeam>(OnGoalScoredOnRedTeam);
+        ServicesLocator.EventManager.Unregister<GoalScored>(OnGoalScored);
     }
     #endregion
 
@@ -57,6 +56,16 @@ public class ScoreManager
         }
     }
 
+    public void EnableReadyText(TextMeshProUGUI readytextobj)
+    {
+        readytextobj.gameObject.SetActive(true);
+    }
+
+    public void DisableReadyText(TextMeshProUGUI readytextobj)
+    {
+        readytextobj.gameObject.SetActive(false);
+    }
+
     private string StyleTimer(float timer)
     {
         int minutes = Mathf.FloorToInt(timer / 60F);
@@ -68,14 +77,18 @@ public class ScoreManager
     #endregion
 
     #region Event Handler Functions
-    public void OnGoalScoredOnBlueTeam(AGPEvent e)
+    public void OnGoalScored(AGPEvent e)
     {
-        redScore++;
-    }
+        var goalName = ((GoalScored)e).goalName;
 
-    public void OnGoalScoredOnRedTeam(AGPEvent e)
-    {
-        blueScore++;
+        if (goalName == "PlayerGoal")
+        {
+            redScore++;
+        }
+        else if (goalName == "EnemyGoal")
+        {
+            blueScore++;
+        }
     }
     #endregion
 }

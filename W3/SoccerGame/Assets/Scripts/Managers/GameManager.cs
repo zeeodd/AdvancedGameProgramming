@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
 
     public TextMeshProUGUI score;
     public TextMeshProUGUI timer;
+    public TextMeshProUGUI readyText;
 
     public GameObject titleScreen;
 
@@ -26,11 +27,8 @@ public class GameManager : MonoBehaviour
 
     public GameObject endScreen;
 
-    // Example state check
-    public bool IsInGame()
-    {
-        return _GameManagerStateMachine.CurrentState.GetType() == typeof(GameStart);
-    }
+    public float pauseDuration = 2.0f;
+    private bool isGamePaused = false;
 
     private FiniteStateMachine<GameManager> _GameManagerStateMachine;
     #endregion
@@ -50,6 +48,7 @@ public class GameManager : MonoBehaviour
     {
         ServicesLocator.EventManager.Unregister<GameOver>(HandleGameOver);
         ServicesLocator.EventManager.Unregister<GameTimeOut>(HandleGameOver);
+        ServicesLocator.EventManager.Unregister<GoalScored>(OnGoalScored);
     }
     #endregion
 
@@ -64,7 +63,7 @@ public class GameManager : MonoBehaviour
         ServicesLocator.AIPlayers = new List<SoccerPlayer>();
         ServicesLocator.EventManager = new EventManager();
 
-        ServicesLocator.ScoreManager.Initialize(score, timer);
+        ServicesLocator.ScoreManager.Initialize(score, timer, readyText);
 
         _GameManagerStateMachine = new FiniteStateMachine<GameManager>(this);
         _GameManagerStateMachine.TransitionTo<TitleScreenState>();
@@ -77,19 +76,19 @@ public class GameManager : MonoBehaviour
             if (i == 0)
             {
                 var gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
-                ServicesLocator.UserPlayer.Add(new UserPlayer(gameobj).SetTag("Player").SetAI(false));
+                ServicesLocator.UserPlayer.Add(new UserPlayer(gameobj).SetPosition(-7, i).SetTag("Player").SetAI(false));
             }
             else
             {
                 var gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
-                ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(-8,i).SetTag("AI").SetAI(true));
+                ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(-7,i).SetTag("AI").SetAI(true));
             }
         }
 
         for (int i = 0; i < redTeamNumber; i++)
         {
             var gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Enemy"));
-            ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(8, i).SetTag("AI").SetAI(true));
+            ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(7, i).SetTag("AI").SetAI(true));
         }
 
     }
@@ -112,12 +111,40 @@ public class GameManager : MonoBehaviour
         gameScreen.SetActive(true);
         endScreen.SetActive(false);
     }
+
+    private void ResumeGame()
+    {
+        isGamePaused = false;
+        ServicesLocator.ScoreManager.DisableReadyText(readyText);
+    }
     #endregion
 
     #region Event Handler Functions
     private void HandleGameOver(AGPEvent e)
     {
         _GameManagerStateMachine.TransitionTo<GameOverState>();
+    }
+
+    private void OnGoalScored(AGPEvent e)
+    {
+        Invoke("ResumeGame", pauseDuration);
+        ServicesLocator.ScoreManager.EnableReadyText(readyText);
+
+        isGamePaused = true;
+
+        ball.GetComponent<Ball>().ResetMomentum();
+        ball.GetComponent<Ball>().ResetPosition();
+
+        foreach (SoccerPlayer ai in ServicesLocator.AIPlayers)
+        {
+            ai.SetPosition(ai._initialPosition.x, ai._initialPosition.y);
+        }
+
+        foreach (SoccerPlayer player in ServicesLocator.UserPlayer)
+        {
+            player.SetPosition(player._initialPosition.x, player._initialPosition.y);
+        }
+
     }
     #endregion
 
@@ -129,6 +156,7 @@ public class GameManager : MonoBehaviour
         {
             ServicesLocator.EventManager.Register<GameOver>(Context.HandleGameOver);
             ServicesLocator.EventManager.Register<GameTimeOut>(Context.HandleGameOver);
+            ServicesLocator.EventManager.Register<GoalScored>(Context.OnGoalScored);
         }
         public override void Update() { }
         public override void OnExit() { }
@@ -162,13 +190,16 @@ public class GameManager : MonoBehaviour
             base.OnEnter();
             Context.InitializeGameScreen();
             Context.ball.GetComponent<Ball>().ResetPosition();
-            ServicesLocator.ScoreManager.Initialize(Context.score, Context.timer);
+            ServicesLocator.ScoreManager.Initialize(Context.score, Context.timer, Context.readyText);
         }
 
         public override void Update()
         {
-            ServicesLocator.AIManager.MoveTowardsBall(Context.ball, Context.aiMovementSpeed);
-            ServicesLocator.InputManager.MovePlayer();
+            if (!Context.isGamePaused)
+            {
+                ServicesLocator.AIManager.MoveTowardsBall(Context.ball, Context.aiMovementSpeed);
+                ServicesLocator.InputManager.MovePlayer();
+            }
             ServicesLocator.ScoreManager.UpdateScore(Context.score);
             ServicesLocator.ScoreManager.UpdateTimer(Context.timer);
         }

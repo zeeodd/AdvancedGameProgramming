@@ -71,10 +71,6 @@ public abstract class AGPEvent
 #endregion
 
 #region Events
-public class GoalScoredOnBlueTeam : AGPEvent { }
-
-public class GoalScoredOnRedTeam : AGPEvent { }
-
 public class GameOver : AGPEvent { }
 
 public class GameStart : AGPEvent { }
@@ -88,5 +84,15 @@ public class GameTimeOut : AGPEvent
         this.blueScore = blueScore;
         this.redScore = redScore;
     }
+}
+
+public class GoalScored : AGPEvent
+{
+	public readonly string goalName;
+
+	public GoalScored(string goalName)
+	{
+		this.goalName = goalName;
+	}
 }
 #endregion

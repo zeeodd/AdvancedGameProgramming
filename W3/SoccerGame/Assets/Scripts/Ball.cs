@@ -13,21 +13,19 @@ public class Ball : MonoBehaviour
 
     public void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Goal" && collision.name == "PlayerGoal")
+        if (collision.tag == "Goal")
         {
-            print("Red Team Scored!");
-            ServicesLocator.EventManager.Fire(new GoalScoredOnBlueTeam());
-        }
-
-        if (collision.tag == "Goal" && collision.name == "EnemyGoal")
-        {
-            print("Blue Team Scored!");
-            ServicesLocator.EventManager.Fire(new GoalScoredOnRedTeam());
+            ServicesLocator.EventManager.Fire(new GoalScored(collision.name));
         }
     }
 
     public void ResetPosition()
     {
         transform.position = initialPosition;
+    }
+
+    public void ResetMomentum()
+    {
+        GetComponent<Rigidbody2D>().velocity = Vector2.zero;
     }
 }

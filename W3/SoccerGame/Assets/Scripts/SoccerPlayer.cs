@@ -12,6 +12,7 @@ public abstract class SoccerPlayer
     private GameObject _gameObject;
     private Rigidbody2D _rigidbody2D;
     private SpriteRenderer _spriteRenderer;
+    public Vector2 _initialPosition;
     #endregion
 
     #region Lifecycle Management
@@ -20,6 +21,7 @@ public abstract class SoccerPlayer
         _gameObject = gameObject;
         _rigidbody2D = _gameObject.GetComponent<Rigidbody2D>();
         _spriteRenderer = _gameObject.GetComponent<SpriteRenderer>();
+        _initialPosition = Vector2.zero;
     }
 
     public abstract void Update();
@@ -49,7 +51,9 @@ public abstract class SoccerPlayer
 
     public SoccerPlayer SetPosition(float x, float y)
     {
+        _rigidbody2D.velocity = Vector2.zero;
         _gameObject.transform.position = new Vector2(x, y);
+        _initialPosition = _gameObject.transform.position;
 
         return this;
     }
