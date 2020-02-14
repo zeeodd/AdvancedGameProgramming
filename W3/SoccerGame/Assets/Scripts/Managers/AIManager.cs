@@ -21,7 +21,14 @@ public class AIManager
         {
             foreach (GameObject ai in ServicesLocator.AIManager.listOfAI)
             {
-                ai.GetComponent<AIController>().MoveTowardsBall(ball, speed);
+                if (ai.GetComponent<RefereeController>())
+                {
+                    continue;
+                } 
+                else if (ai.GetComponent<AIController>())
+                {
+                    ai.GetComponent<AIController>().MoveTowardsBall(ball, speed);
+                }
             }
         }
     }
@@ -30,7 +37,14 @@ public class AIManager
     {
         foreach (GameObject aiplayer in listOfAI)
         {
-            aiplayer.GetComponent<AIController>().Destroy();
+            if (aiplayer.GetComponent<RefereeController>())
+            {
+                aiplayer.GetComponent<RefereeController>().Destroy();
+            }
+            else if (aiplayer.GetComponent<AIController>())
+            {
+                aiplayer.GetComponent<AIController>().Destroy();
+            }
         }
 
         listOfAI.Clear();

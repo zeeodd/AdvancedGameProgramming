@@ -75,21 +75,24 @@ public class GameManager : MonoBehaviour
         {
             if (i == 0)
             {
-                var gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
-                ServicesLocator.UserPlayer.Add(new UserPlayer(gameobj).SetPosition(-7, i).SetTag("Player").SetAI(false));
+                GameObject gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
+                ServicesLocator.UserPlayer.Add(new UserPlayer(gameobj).SetPosition(-7, i).SetTag("Player").SetAIType("Player"));
             }
             else
             {
-                var gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
-                ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(-7,i).SetTag("AI").SetAI(true));
+                GameObject gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
+                ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(-7,i).SetTag("AI").SetAIType("Enemy"));
             }
         }
 
         for (int i = 0; i < redTeamNumber; i++)
         {
-            var gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Enemy"));
-            ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(7, i).SetTag("AI").SetAI(true));
+            GameObject gameobj = Instantiate(Resources.Load<GameObject>("Prefabs/Enemy"));
+            ServicesLocator.AIPlayers.Add(new AIPlayer(gameobj).SetPosition(7, i).SetTag("AI").SetAIType("Enemy"));
         }
+
+        GameObject referee = Instantiate(Resources.Load<GameObject>("Prefabs/Referee"));
+        ServicesLocator.AIPlayers.Add(new AIPlayer(referee).SetPosition(0, 3).SetTag("AI").SetAIType("Referee"));
 
     }
 
@@ -137,11 +140,13 @@ public class GameManager : MonoBehaviour
 
         foreach (SoccerPlayer ai in ServicesLocator.AIPlayers)
         {
+            ai.ResetMomentum();
             ai.SetPosition(ai._initialPosition.x, ai._initialPosition.y);
         }
 
         foreach (SoccerPlayer player in ServicesLocator.UserPlayer)
         {
+            player.ResetMomentum();
             player.SetPosition(player._initialPosition.x, player._initialPosition.y);
         }
 

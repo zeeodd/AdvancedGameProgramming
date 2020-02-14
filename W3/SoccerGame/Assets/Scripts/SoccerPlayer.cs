@@ -6,7 +6,7 @@ public abstract class SoccerPlayer
 {
     #region Variables
     public bool isBlueTeam;
-    public bool isAI;
+    public string aiType;
 
     private const float MOVEMENT_SPEED = 5.0f;
     private GameObject _gameObject;
@@ -34,16 +34,20 @@ public abstract class SoccerPlayer
 
     #region Basic Functionality
 
-    public SoccerPlayer SetAI(bool aiBool)
+    public SoccerPlayer SetAIType(string s)
     {
-        isAI = aiBool;
-        if (isAI)
+        aiType = s;
+        if (s == "Player")
+        {
+            _gameObject.AddComponent<InputController>();
+        }
+        else if (s == "Enemy")
         {
             _gameObject.AddComponent<AIController>();
         }
-        else
+        else if (s == "Referee")
         {
-            _gameObject.AddComponent<InputController>();
+            _gameObject.AddComponent<RefereeController>();
         }
 
         return this;
@@ -51,11 +55,15 @@ public abstract class SoccerPlayer
 
     public SoccerPlayer SetPosition(float x, float y)
     {
-        _rigidbody2D.velocity = Vector2.zero;
         _gameObject.transform.position = new Vector2(x, y);
         _initialPosition = _gameObject.transform.position;
 
         return this;
+    }
+
+    public void ResetMomentum()
+    {
+        _rigidbody2D.velocity = Vector2.zero;
     }
 
     public SoccerPlayer SetTag(string s)
@@ -76,7 +84,7 @@ public class AIPlayer : SoccerPlayer
 
     public override void Update()
     {
-        this.SetAI(true);
+        this.SetAIType("Enemy");
     }
 
     #endregion
@@ -92,7 +100,7 @@ public class UserPlayer : SoccerPlayer
 
     public override void Update()
     {
-        this.SetAI(false);
+        this.SetAIType("Player");
     }
 
     #endregion
