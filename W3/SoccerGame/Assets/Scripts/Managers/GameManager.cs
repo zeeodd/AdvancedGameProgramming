@@ -22,13 +22,18 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI readyText;
 
     public GameObject titleScreen;
+    private AudioSource titleScreenAudioSource;
 
     public GameObject gameScreen;
+    private AudioSource gameScreenAudioSource;
 
     public GameObject endScreen;
+    private AudioSource endScreenAudioSource;
 
+    public float pauseTimer = 0f;
     public float pauseDuration = 2.0f;
-    private bool isGamePaused = false;
+    public bool isGamePaused = false;
+    public bool isFoulCalled = false;
 
     private FiniteStateMachine<GameManager> _GameManagerStateMachine;
     #endregion
@@ -118,7 +123,47 @@ public class GameManager : MonoBehaviour
     private void ResumeGame()
     {
         isGamePaused = false;
+        isFoulCalled = false;
+
+        ball.GetComponent<Ball>().ResetPosition();
+
+        foreach (SoccerPlayer ai in ServicesLocator.AIPlayers)
+        {
+            ai.SetPosition(ai._initialPosition.x, ai._initialPosition.y);
+        }
+
+        foreach (SoccerPlayer player in ServicesLocator.UserPlayer)
+        {
+            player.SetPosition(player._initialPosition.x, player._initialPosition.y);
+        }
+        
         ServicesLocator.ScoreManager.DisableReadyText(readyText);
+    }
+
+    private void HandlePausedGame()
+    {
+        if (isGamePaused || isFoulCalled)
+        {
+            pauseTimer += Time.deltaTime;
+
+            ball.GetComponent<Ball>().ResetMomentum();
+
+            foreach (SoccerPlayer ai in ServicesLocator.AIPlayers)
+            {
+                ai.ResetMomentum();
+            }
+
+            foreach (SoccerPlayer player in ServicesLocator.UserPlayer)
+            {
+                player.ResetMomentum();
+            }
+
+            if (pauseTimer >= pauseDuration)
+            {
+                pauseTimer = 0f;
+                ResumeGame();
+            }
+        }
     }
     #endregion
 
@@ -130,25 +175,9 @@ public class GameManager : MonoBehaviour
 
     private void OnGoalScored(AGPEvent e)
     {
-        Invoke("ResumeGame", pauseDuration);
         ServicesLocator.ScoreManager.EnableReadyText(readyText);
 
         isGamePaused = true;
-
-        ball.GetComponent<Ball>().ResetMomentum();
-        ball.GetComponent<Ball>().ResetPosition();
-
-        foreach (SoccerPlayer ai in ServicesLocator.AIPlayers)
-        {
-            ai.ResetMomentum();
-            ai.SetPosition(ai._initialPosition.x, ai._initialPosition.y);
-        }
-
-        foreach (SoccerPlayer player in ServicesLocator.UserPlayer)
-        {
-            player.ResetMomentum();
-            player.SetPosition(player._initialPosition.x, player._initialPosition.y);
-        }
 
     }
     #endregion
@@ -172,6 +201,8 @@ public class GameManager : MonoBehaviour
         public override void OnEnter()
         {
             Context.InitializeTitleScreen();
+            Context.titleScreenAudioSource = Context.titleScreen.GetComponent<AudioSource>();
+            Context.titleScreenAudioSource.Play();
         }
 
         public override void Update()
@@ -185,6 +216,8 @@ public class GameManager : MonoBehaviour
         public override void OnExit()
         {
             base.OnExit();
+
+            Context.titleScreenAudioSource.Stop();
         }
     }
 
@@ -193,17 +226,27 @@ public class GameManager : MonoBehaviour
         public override void OnEnter()
         {
             base.OnEnter();
+
             Context.InitializeGameScreen();
+            Context.isFoulCalled = false;
+            Context.isGamePaused = false;
             Context.ball.GetComponent<Ball>().ResetPosition();
             ServicesLocator.ScoreManager.Initialize(Context.score, Context.timer, Context.readyText);
+            Context.gameScreenAudioSource = Context.gameScreen.GetComponent<AudioSource>();
+            Context.gameScreenAudioSource.Play();
         }
 
         public override void Update()
         {
-            if (!Context.isGamePaused)
+
+            if (!Context.isGamePaused && !Context.isFoulCalled)
             {
                 ServicesLocator.AIManager.MoveTowardsBall(Context.ball, Context.aiMovementSpeed);
                 ServicesLocator.InputManager.MovePlayer();
+            } 
+            else
+            {
+                Context.HandlePausedGame();
             }
             ServicesLocator.ScoreManager.UpdateScore(Context.score);
             ServicesLocator.ScoreManager.UpdateTimer(Context.timer);
@@ -212,6 +255,8 @@ public class GameManager : MonoBehaviour
         public override void OnExit()
         {
             base.OnExit();
+
+            Context.gameScreenAudioSource.Stop();
         }
     }
 
@@ -224,6 +269,9 @@ public class GameManager : MonoBehaviour
 
             ServicesLocator.AIManager.Destroy();
             ServicesLocator.InputManager.Destroy();
+
+            Context.endScreenAudioSource = Context.endScreen.GetComponent<AudioSource>();
+            Context.endScreenAudioSource.Play();
         }
 
         public override void Update()
@@ -239,6 +287,7 @@ public class GameManager : MonoBehaviour
             ServicesLocator.UserPlayer.Clear();
             ServicesLocator.AIPlayers.Clear();
             ServicesLocator.ScoreManager.Destroy();
+            Context.endScreenAudioSource.Stop();
         }
     }
     #endregion

@@ -29,6 +29,15 @@ public class InputController : MonoBehaviour
             direction = (mousePosition - transform.position).normalized;
             rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
         }
+
+    }
+
+    public void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "AI" && rb.velocity.magnitude > 8.0f)
+        {
+            ServicesLocator.EventManager.Fire(new PlayerCollision());
+        }
     }
 
     public void Destroy()

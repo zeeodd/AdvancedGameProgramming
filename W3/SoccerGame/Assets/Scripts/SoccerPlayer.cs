@@ -53,12 +53,37 @@ public abstract class SoccerPlayer
         return this;
     }
 
+    public string GetAIType()
+    {
+        string s = "";
+
+        if (_gameObject.GetComponent<InputController>())
+        {
+            s = "Player";
+        }
+        else if (_gameObject.GetComponent<AIController>())
+        {
+            s = "Enemy";
+        }
+        else if (_gameObject.GetComponent<RefereeController>())
+        {
+            s = "Referee";
+        }
+
+        return s;
+    }
+
     public SoccerPlayer SetPosition(float x, float y)
     {
         _gameObject.transform.position = new Vector2(x, y);
         _initialPosition = _gameObject.transform.position;
 
         return this;
+    }
+
+    public Vector3 GetPosition()
+    {
+        return _gameObject.transform.position;
     }
 
     public void ResetMomentum()

@@ -75,6 +75,8 @@ public class GameOver : AGPEvent { }
 
 public class GameStart : AGPEvent { }
 
+public class PlayerCollision : AGPEvent { }
+
 public class GameTimeOut : AGPEvent
 {
     public readonly int blueScore, redScore;
