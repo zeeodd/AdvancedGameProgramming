@@ -9,7 +9,7 @@ public abstract class SoccerPlayer
     public string aiType;
 
     private const float MOVEMENT_SPEED = 5.0f;
-    private GameObject _gameObject;
+    public GameObject _gameObject;
     private Rigidbody2D _rigidbody2D;
     private SpriteRenderer _spriteRenderer;
     public Vector2 _initialPosition;

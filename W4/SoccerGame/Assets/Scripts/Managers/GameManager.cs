@@ -227,6 +227,8 @@ public class GameManager : MonoBehaviour
         {
             base.OnEnter();
 
+            ServicesLocator.EventManager.Fire(new GameStart());
+
             Context.InitializeGameScreen();
             Context.isFoulCalled = false;
             Context.isGamePaused = false;
