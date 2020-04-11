@@ -125,7 +125,7 @@ public class RefereeController : MonoBehaviour
         // Move accordingly
         if (!isPlayerCloser)
         {
-            if (ballDist > 2.5f)
+            if (ballDist > 4.5f)
             {
                 direction = (ball.transform.position - transform.position).normalized;
                 rb.velocity = new Vector2(direction.x * speed, direction.y * speed);
@@ -138,7 +138,7 @@ public class RefereeController : MonoBehaviour
         } 
         else if (isPlayerCloser)
         {
-            if (minDist < 5.0f)
+            if (minDist < 4.5f)
             {
                 foreach (SoccerPlayer sp in soccerPlayers)
                 {
@@ -155,6 +155,7 @@ public class RefereeController : MonoBehaviour
         }
 
     }
+    
     public void Shake()
     {
         var jitter = (0.1f * Random.insideUnitSphere);
@@ -162,7 +163,6 @@ public class RefereeController : MonoBehaviour
 
         transform.position += jitter;
     }
-
 
     public void Destroy()
     {

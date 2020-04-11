@@ -34,7 +34,7 @@ public class InputController : MonoBehaviour
 
     public void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "AI" && rb.velocity.magnitude > 8.0f)
+        if (collision.gameObject.tag == "AI" && rb.velocity.magnitude > 10.0f)
         {
             ServicesLocator.EventManager.Fire(new PlayerCollision());
         }
