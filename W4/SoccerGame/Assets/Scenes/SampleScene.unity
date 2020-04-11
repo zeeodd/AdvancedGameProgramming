@@ -1250,8 +1250,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activationKey: 113
-  degreesPerSecond: 15
+  degreesPerFrame: 5
   direction: 0
+  effect: {fileID: 6208078778454744495, guid: ccd4c6f7d2181404685a12c17d3b9cf3, type: 3}
 --- !u!1 &821104937
 GameObject:
   m_ObjectHideFlags: 0
@@ -2630,12 +2631,12 @@ PrefabInstance:
     - target: {fileID: 837630435688981855, guid: 1195f4474aa4249b8a593d2c69521cac,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.2824703
+      value: -1.26
       objectReference: {fileID: 0}
     - target: {fileID: 837630435688981855, guid: 1195f4474aa4249b8a593d2c69521cac,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.05714274
+      value: 0.06
       objectReference: {fileID: 0}
     - target: {fileID: 837630435688981855, guid: 1195f4474aa4249b8a593d2c69521cac,
         type: 3}
