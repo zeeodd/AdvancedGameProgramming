@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RotatePower : MonoBehaviour
 {
-    [Header("Rotate Power Attributes")]
+    [Header("General Rotation Variables")]
     public KeyCode activationKey;
 
     public float degreesPerFrame;
@@ -12,14 +12,24 @@ public class RotatePower : MonoBehaviour
     public enum Direction { Left, Right }
     public Direction direction;
 
-    public enum Effect { Particles, Trail }
+    public enum Effect { Ring, Trail }
     public Effect effect;
 
-    [Header("Visual Effect")]
+    [Header("Trail Effect Attributes")]
     public Gradient gradient;
 
     [Range(0f, 1f)]
     public float tailLength;
+
+    [Header("Ring Effect Attributes")]
+    [Range(0f, 0.25f)]
+    public float minRadius;
+    [Range(0.25f, 1f)]
+    public float maxRadius;
+    [Range(0f, 1f)]
+    public float radiusIncreaseDuration;
+
+    public Color ringColor;
 
     /*
      * Private variables to control functionality
@@ -84,27 +94,49 @@ public class RotatePower : MonoBehaviour
                     trailEffect.GetComponent<TrailRenderer>().colorGradient = gradient;
                     trailEffect.GetComponent<TrailRenderer>().time = tailLength;
                     break;
-                case Effect.Particles:
+                case Effect.Ring:
                     GameObject particlesEffect = Instantiate(Resources.Load<GameObject>("Prefabs/Burst"));
                     currentEffect = particlesEffect;
                     particlesEffect.gameObject.transform.parent = playerGameObject.transform;
                     particlesEffect.transform.localPosition = new Vector3(0f, 0f, 0f);
-                    StartCoroutine(IncreaseRadius(0.2f, 0.7f, 0.5f));
-                    //particlesEffect.GetComponent<ParticleSystem>().colorOverLifetime = gradient;
+                    var main = particlesEffect.GetComponent<ParticleSystem>().main;
+                    main.startColor = ringColor;
+                    StartCoroutine(IncreaseRadius(minRadius, maxRadius, radiusIncreaseDuration));
                     break;
             }
 
-            
+            effectAdded = true;
         }
         else
         {
-            playerGameObject.transform.GetChild(0).GetComponent<TrailRenderer>().enabled = true;
+            switch (effect)
+            {
+                case Effect.Trail:
+                    playerGameObject.transform.GetChild(0).GetComponent<TrailRenderer>().enabled = true;
+                    break;
+                case Effect.Ring:
+                    playerGameObject.transform.GetChild(0).GetComponent<ParticleSystem>().Play();
+                    StartCoroutine(IncreaseRadius(minRadius, maxRadius, radiusIncreaseDuration));
+                    playerGameObject.transform.GetChild(0).GetComponent<CircleCollider2D>().enabled = true;
+                    break;
+            }
         }
     }
 
     private void DestroyEffect()
     {
-        playerGameObject.transform.GetChild(0).GetComponent<TrailRenderer>().enabled = false;
+        switch (effect)
+        {
+            case Effect.Trail:
+                playerGameObject.transform.GetChild(0).GetComponent<TrailRenderer>().enabled = false;
+                break;
+            case Effect.Ring:
+                playerGameObject.transform.GetChild(0).GetComponent<ParticleSystem>().Stop();
+                playerGameObject.transform.GetChild(0).GetComponent<ParticleSystem>().Clear();
+                playerGameObject.transform.GetChild(0).GetComponent<CircleCollider2D>().enabled = false;
+                break;
+        }
+        
     }
 
     private void InitializePowers(AGPEvent e)
@@ -121,7 +153,6 @@ public class RotatePower : MonoBehaviour
         while (t < duration)
         {
             t += Time.deltaTime;
-            Debug.Log(shape.radius);
             shape.radius = Mathf.Lerp(startRadius, endRadius, t / duration);
             yield return null;
         }

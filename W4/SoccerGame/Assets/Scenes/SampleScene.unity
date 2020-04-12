@@ -1283,6 +1283,10 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   tailLength: 0.35
+  minRadius: 0
+  maxRadius: 0.75
+  radiusIncreaseDuration: 0.6
+  ringColor: {r: 0, g: 0.5176471, b: 1, a: 1}
 --- !u!1 &821104937
 GameObject:
   m_ObjectHideFlags: 0
