@@ -86,13 +86,24 @@ public class RotatePower : MonoBehaviour
         gameHasStarted = true;
     }
 
+    private void HandleGameOver(AGPEvent e)
+    {
+        DestroyEffect();
+        gameHasStarted = false;
+        isRotating = false;
+    }
+
     private void RegisterListeners()
     {
         ServicesLocator.EventManager.Register<GameStart>(InitializePowers);
+        ServicesLocator.EventManager.Register<GameOver>(HandleGameOver);
+        ServicesLocator.EventManager.Register<GameTimeOut>(HandleGameOver);
     }
 
     private void UnregisterListeners()
     {
         ServicesLocator.EventManager.Unregister<GameStart>(InitializePowers);
+        ServicesLocator.EventManager.Unregister<GameOver>(HandleGameOver);
+        ServicesLocator.EventManager.Unregister<GameTimeOut>(HandleGameOver);
     }
 }
