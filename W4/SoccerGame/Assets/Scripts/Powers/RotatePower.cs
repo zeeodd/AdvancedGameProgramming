@@ -12,7 +12,14 @@ public class RotatePower : MonoBehaviour
     public enum Direction { Left, Right }
     public Direction direction;
 
-    public TrailRenderer effect;
+    public enum Effect { Particles, Trail }
+    public Effect effect;
+
+    [Header("Visual Effect")]
+    public Gradient gradient;
+
+    [Range(0f, 1f)]
+    public float tailLength;
 
     /*
      * Private variables to control functionality
@@ -22,6 +29,7 @@ public class RotatePower : MonoBehaviour
     private bool effectAdded = false;
     private Quaternion restingRotation = new Quaternion(0f, 0f, 0f, 0f);
     private GameObject playerGameObject;
+    private GameObject currentEffect;
 
     private void Start()
     {
@@ -66,9 +74,27 @@ public class RotatePower : MonoBehaviour
     {
         if (!effectAdded)
         {
-            GameObject trailEffect = Instantiate(Resources.Load<GameObject>("Prefabs/Trail"));
-            trailEffect.gameObject.transform.parent = playerGameObject.transform;
-            trailEffect.transform.localPosition = new Vector3(0f, 0f, 0f);
+            switch(effect)
+            {
+                case Effect.Trail:
+                    GameObject trailEffect = Instantiate(Resources.Load<GameObject>("Prefabs/Trail"));
+                    currentEffect = trailEffect;
+                    trailEffect.gameObject.transform.parent = playerGameObject.transform;
+                    trailEffect.transform.localPosition = new Vector3(0f, 0f, 0f);
+                    trailEffect.GetComponent<TrailRenderer>().colorGradient = gradient;
+                    trailEffect.GetComponent<TrailRenderer>().time = tailLength;
+                    break;
+                case Effect.Particles:
+                    GameObject particlesEffect = Instantiate(Resources.Load<GameObject>("Prefabs/Burst"));
+                    currentEffect = particlesEffect;
+                    particlesEffect.gameObject.transform.parent = playerGameObject.transform;
+                    particlesEffect.transform.localPosition = new Vector3(0f, 0f, 0f);
+                    StartCoroutine(IncreaseRadius(0.2f, 0.7f, 0.5f));
+                    //particlesEffect.GetComponent<ParticleSystem>().colorOverLifetime = gradient;
+                    break;
+            }
+
+            
         }
         else
         {
@@ -84,6 +110,22 @@ public class RotatePower : MonoBehaviour
     private void InitializePowers(AGPEvent e)
     {
         gameHasStarted = true;
+    }
+
+    IEnumerator IncreaseRadius(float startRadius, float endRadius, float duration)
+    {
+        float t = 0f;
+        var shape = currentEffect.GetComponent<ParticleSystem>().shape;
+        shape.radius = startRadius;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            Debug.Log(shape.radius);
+            shape.radius = Mathf.Lerp(startRadius, endRadius, t / duration);
+            yield return null;
+        }
+        shape.radius = endRadius;
     }
 
     private void HandleGameOver(AGPEvent e)
